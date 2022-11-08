@@ -1,9 +1,8 @@
 package ds.project4task2webservice;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
@@ -14,13 +13,19 @@ public class HelloServlet extends HttpServlet {
     public void init() {
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+
+        //Reading params adapted from user itsraja: https://stackoverflow.com/questions/36647210/servlet-reading-inputstream-for-a-post-value-gives-null
+        BufferedReader br = new BufferedReader(new InputStreamReader(req.getInputStream()));
+        String params = br.readLine();
+
         Trip trip = new Trip();
-        request.getpara
-        message = trip.getAPIResponse(request.get);
+        message = trip.getAPIResponse(params);
 
         // Hello
-        PrintWriter out = response.getWriter();
+        PrintWriter out = resp.getWriter();
         out.println(message);
     }
 

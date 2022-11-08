@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 
 public class Trip {
 
-    private String api_key = "live_96voBc4iwXAcKUf5N4CiLsb1uTK3yJZM4ZixHhqRtU8tKSxgNGbkbXTIakgEHXfiU-dO5MGmy4Tuh0VUSPDlRg==";
+    final private String api_key = "live_96voBc4iwXAcKUf5N4CiLsb1uTK3yJZM4ZixHhqRtU8tKSxgNGbkbXTIakgEHXfiU-dO5MGmy4Tuh0VUSPDlRg==";
     private String base = "https://klimaat.app/api/v1/calculate?";
     private String message;
 
@@ -73,11 +73,6 @@ public class Trip {
             while ((inputLine = in.readLine()) != null) {
                 message = inputLine;
             }
-
-            //Transform the response message to send back to user
-
-
-
         }
         catch(Exception e)
         {
