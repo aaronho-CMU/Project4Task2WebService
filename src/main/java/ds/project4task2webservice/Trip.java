@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
@@ -23,6 +25,9 @@ public class Trip {
 
         ArrayList<String> param_names = new ArrayList<>();
         ArrayList<String> param_values = new ArrayList<>();
+
+        String q = "CR-V";
+        String test = "https://example.com?q=" + URLEncoder.encode(q, StandardCharsets.UTF_8);
 
         try {
             //Getting all the params from the
@@ -59,7 +64,10 @@ public class Trip {
             //Construct endpoint for api call
             for(int i = 0; i < param_names.size(); i++)
             {
-                endpoint = endpoint +"&"+param_names.get(i) +"="+param_values.get(i);
+                if(!param_values.get(i).isEmpty()) {
+                    //https://stackoverflow.com/questions/10786042/java-url-encoding-of-query-string-parameters
+                    endpoint = endpoint + "&" + param_names.get(i) + "=" + URLEncoder.encode(param_values.get(i), StandardCharsets.UTF_8);
+                }
             }
 
             //Code adapted from https://www.java67.com/2019/03/7-examples-of-httpurlconnection-in-java.html
@@ -78,7 +86,14 @@ public class Trip {
         {
             System.out.println(e.getMessage());
         }
-        return getRequiredOutput(message);
+        try
+        {
+            return getRequiredOutput(message);
+        }
+        catch (Exception ex)
+        {
+            return "{\"status\":400,\"message\":\"Bad Request\"}";
+        }
     }
 
     private String getRequiredOutput(String apiResponse)
