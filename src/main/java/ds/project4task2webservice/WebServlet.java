@@ -4,13 +4,17 @@ import java.io.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
 
-@WebServlet(name = "CarbonFootPrint", value = "/calculateCarbonFootprint")
-public class HelloServlet extends HttpServlet {
+@jakarta.servlet.annotation.WebServlet(name = "CarbonFootPrint", value = "/calculateCarbonFootprint")
+public class WebServlet extends HttpServlet {
     private String message;
 
     public void init() {
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doGet(req, resp);
     }
 
     @Override

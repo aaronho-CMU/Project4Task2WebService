@@ -26,9 +26,6 @@ public class Trip {
         ArrayList<String> param_names = new ArrayList<>();
         ArrayList<String> param_values = new ArrayList<>();
 
-        String q = "CR-V";
-        String test = "https://example.com?q=" + URLEncoder.encode(q, StandardCharsets.UTF_8);
-
         try {
             //Getting all the params from the
             //Code adapted from user Emiel
@@ -86,10 +83,12 @@ public class Trip {
         {
             System.out.println(e.getMessage());
         }
+        //Return the response from the API by extracting the required pieces of data
         try
         {
             return getRequiredOutput(message);
         }
+        //If the API responds with an error or the request parameters are bad, return a 400 status code to the app
         catch (Exception ex)
         {
             return "{\"status\":400,\"message\":\"Bad Request\"}";
