@@ -4,6 +4,7 @@ import java.io.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import com.google.gson.Gson;
 import com.mongodb.ConnectionString;
@@ -41,11 +42,6 @@ public class WebServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Transfer control over to the correct "view"
-        // Code taken from Lab2 InterestingPicture: https://github.com/CMU-Heinz-95702/Lab2-InterestingPicture
-        String newView = "dashboard.jsp";
-        RequestDispatcher view = req.getRequestDispatcher(newView);
-        view.forward(req, resp);
 
         //Store variables for display into req variable to return to the dashboard jsp
         //Following code taken from https://www.mongodb.com/docs/drivers/java/sync/v4.3/usage-examples/find/
@@ -53,15 +49,19 @@ public class WebServlet extends HttpServlet {
 
         //Set the attributes of the request to the arraylists of each collection to display on the dashboard.
         //Each collection will be an arraylist of objects/documents
-        req.setAttribute("popular_transport_modes",MongoDocuments.generateDocumentLists("popular_transport_modes",database));
-        req.setAttribute("start_end_pairs",MongoDocuments.generateDocumentLists("start_end_pairs",database));
-        req.setAttribute("top_carbon_footprint",MongoDocuments.generateDocumentLists("top_carbon_footprint",database));
         req.setAttribute("Logs", MongoDocuments.generateDocumentLists("logs",database));
 
+        //Calculate count of start,end pairs and set to request
+        req.setAttribute("start_end_pairs",MongoDocuments.getTop5StartEnd(database));
+
         //Calculate count of transport modes and set to request
-        ArrayList<MongoDocuments> mode = MongoDocuments.generateDocumentLists("popular_transport_modes",database);
+        req.setAttribute("popular_transport_modes",MongoDocuments.modeCount(database));
 
-
+        // Transfer control over to the correct "view"
+        // Code taken from Lab2 InterestingPicture: https://github.com/CMU-Heinz-95702/Lab2-InterestingPicture
+        String newView = "dashboard.jsp";
+        RequestDispatcher view = req.getRequestDispatcher(newView);
+        view.forward(req, resp);
     }
 
     @Override
@@ -76,18 +76,17 @@ public class WebServlet extends HttpServlet {
         //Store for logs
         MongoDocuments.device = req.getHeader("User-Agent");
         MongoDocuments.deviceRequestType = req.getMethod();
-        MongoDocuments.params = params;
         //Get local time as timestamp
         //Code taken from https://mkyong.com/java8/java-8-convert-localdatetime-to-timestamp/
         MongoDocuments.timestamp = Timestamp.valueOf(LocalDateTime.now()).toString();
+
+        Trip trip = new Trip(database);
+        message = trip.getAPIResponse(params);
 
         //Generate document and store logs into MongoDB. might be out of order
         MongoCollection<Document> collection = database.getCollection("logs");;
         InsertOneResult result;
         result = collection.insertOne(MongoDocuments.createLogDocument());
-
-        Trip trip = new Trip(database);
-        message = trip.getAPIResponse(params);
 
         // Return parsed out response to mobile application
         PrintWriter out = resp.getWriter();

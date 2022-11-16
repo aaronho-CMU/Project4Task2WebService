@@ -85,18 +85,24 @@ public class Trip {
 
             //Append API key to base
             String endpoint = base + "key=" + api_key;
-
+            String logParam = "";
             //Construct endpoint for api call
             for(int i = 0; i < param_names.size(); i++)
             {
                 if(!param_values.get(i).isEmpty()) {
                     //Store parameters into footprint_d
-//                    footprint_d.append(param_names.get(i),param_values.get(i));
+                    footprint_d.append(param_names.get(i),param_values.get(i));
+
+                    //Construct param string for logging
+                    logParam = logParam + param_names.get(i)+" = " + param_values.get(i) + ";";
 
                     //https://stackoverflow.com/questions/10786042/java-url-encoding-of-query-string-parameters
                     endpoint = endpoint + "&" + param_names.get(i) + "=" + URLEncoder.encode(param_values.get(i), StandardCharsets.UTF_8);
                 }
             }
+
+            //Log the
+            MongoDocuments.params = logParam;
 
             //Make GET request to API
             //Code adapted from https://www.java67.com/2019/03/7-examples-of-httpurlconnection-in-java.html
@@ -130,7 +136,13 @@ public class Trip {
             storeOperationAnalytics("top_carbon_footprint",footprint_d);
 
             //Store parsed out response from API into logs
-            MongoDocuments.response = gson.toJson(androidSendMessage);
+            String response = gson.toJson(androidSendMessage);
+            response = response.replace("\"","");
+            response = response.replace("{","");
+            response = response.replace("}","");
+            response = response.replace(":"," = ");
+            response = response.replace(",",";");
+            MongoDocuments.response = response;
 
             //Convert androidSendMessage to string and return to user
             return gson.toJson(androidSendMessage);
@@ -138,6 +150,8 @@ public class Trip {
         //If the API responds with an error or the request parameters are bad, return a 400 status code to the app
         catch (Exception ex)
         {
+            //Store error response from API into logs
+            MongoDocuments.response = "400 Bad Request";
             return "{\"status\":400,\"message\":\"Bad Request\"}";
         }
     }
