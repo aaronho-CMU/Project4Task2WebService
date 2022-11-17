@@ -1,3 +1,16 @@
+// Aaron Ho aaronho, Noopur Latkar nlatkar
+
+/**
+ * Author: Aaron Ho (aaronho), Noopur Latkar (nlatkar)
+ * Last Modified: November 18, 2022
+ *
+ * This program is the web service in which in our mobile app will make a call to.
+ * It will then take the parameters from the app and pass to them to the API.
+ * This service will parse out the data we need from the response of the API and
+ * return it back to the user. This is the Trip class where we will be making calls to the API
+ * and parsing out the response.
+ */
+
 package ds.project4task2webservice;
 
 import java.io.BufferedReader;
@@ -8,7 +21,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -18,17 +30,35 @@ import org.bson.types.ObjectId;
 
 public class Trip {
 
+    //This is the key to the API so that we are authenticated to use the service
     final private String api_key = "live_KL9sikwhrQnyTOzvyQR1AQynytbEHVMCyRppFgQj9VIb38MCvZhs1AjSAeQKVK-sShP3O899rv0Vv00LXPQBYw==";
+
+    //The base endpoint we will use to make a GET request to the API
     private String base = "https://klimaat.app/api/v1/calculate?";
+
+    //Get the response from the API
     private String message;
 
+    //This is the database we initialized from the servlet
     private MongoDatabase database;
 
-
+    /*
+     * Construct class by passing the MongoDB database connection
+     *
+     * @param none
+     * @return none
+     */
     public Trip(MongoDatabase database) {
         this.database = database;
     }
 
+    /*
+     * This is the main action that will make a request to the API with the given parameters and return a parsed out
+     * response to the application
+     *
+     * @param String params
+     * @return String
+     */
     public String getAPIResponse(String params)
     {
         //Create gson object
@@ -77,15 +107,17 @@ public class Trip {
                 {
                     continue;
                 }
+                //If the API responds with an error or the request parameters are bad, return a 400 status code to the app
                 catch (Exception ex)
                 {
-                    System.out.println(ex.getMessage());
+                    return "{\"status\":400,\"message\":\"Bad Request\"}";
                 }
             }
 
             //Append API key to base
             String endpoint = base + "key=" + api_key;
             String logParam = "";
+
             //Construct endpoint for api call
             for(int i = 0; i < param_names.size(); i++)
             {
@@ -101,7 +133,7 @@ public class Trip {
                 }
             }
 
-            //Log the
+            //Log the parameters to the api into Mongo
             MongoDocuments.params = logParam;
 
             //Make GET request to API
@@ -111,20 +143,23 @@ public class Trip {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
-            //Store request method for logs
+            //Get response from API and store into Message
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 message = inputLine;
             }
 
+            //Store request method for logs
             MongoDocuments.apiRequestType = con.getRequestMethod();
 
         }
+        //If the API is not available, return a 404 status code to the app
         catch(Exception e)
         {
-            System.out.println(e.getMessage());
+            return "{\"status\":404,\"message\":\"Not Found\"}";
         }
+
         //Return the response from the API by extracting the required pieces of data
         try
         {
@@ -135,7 +170,7 @@ public class Trip {
             footprint_d.append("total",androidSendMessage.total_carbon_footprint_grams);
             storeOperationAnalytics("top_carbon_footprint",footprint_d);
 
-            //Store parsed out response from API into logs
+            //Store parsed out response from API into logs. Remove unecessary characters
             String response = gson.toJson(androidSendMessage);
             response = response.replace("\"","");
             response = response.replace("{","");
@@ -180,7 +215,7 @@ public class Trip {
                 apiResponseMessage.data.carbon_footprint.get("tons").getAsJsonObject().get("per_mile").toString()
                 );
 
-        //Return the object back to the user
+        //Return the object back to main activity
         return androidSendMessage;
     }
 
