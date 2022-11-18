@@ -49,7 +49,7 @@ public class WebServlet extends HttpServlet {
     public void init() {
         //Code adapted from Project4 documentation: https://docs.mongodb.com/drivers/java/sync/v4.3/quick-start/
         //and from https://docs.mongodb.com/drivers/java/sync/v4.3/quick-start/
-        ConnectionString connectionString = new ConnectionString("mongodb+srv://aaronho1:blackstormA1@cluster0.5cqnwic.mongodb.net/?retryWrites=true&w=majority");
+        ConnectionString connectionString = new ConnectionString("mongodb://aaronho1:blackstormA1@ac-gl1e8tj-shard-00-00.5cqnwic.mongodb.net:27017,ac-gl1e8tj-shard-00-01.5cqnwic.mongodb.net:27017,ac-gl1e8tj-shard-00-02.5cqnwic.mongodb.net:27017/myFirstDatabase?w=majority&retryWrites=true&tls=true&authMechanism=SCRAM-SHA-1");
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(connectionString)
                 .serverApi(ServerApi.builder()
